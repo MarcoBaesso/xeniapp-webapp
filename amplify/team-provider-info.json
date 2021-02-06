@@ -1,0 +1,19 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-xeniappwebapp-dev-145619-authRole",
+      "UnauthRoleArn": "arn:aws:iam::189395436057:role/amplify-xeniappwebapp-dev-145619-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::189395436057:role/amplify-xeniappwebapp-dev-145619-authRole",
+      "Region": "eu-west-3",
+      "DeploymentBucketName": "amplify-xeniappwebapp-dev-145619-deployment",
+      "UnauthRoleName": "amplify-xeniappwebapp-dev-145619-unauthRole",
+      "StackName": "amplify-xeniappwebapp-dev-145619",
+      "StackId": "arn:aws:cloudformation:eu-west-3:189395436057:stack/amplify-xeniappwebapp-dev-145619/142f70f0-6883-11eb-9b59-0a20e5036728"
+    },
+    "categories": {
+      "auth": {
+        "xeniappwebapp8224bf90": {}
+      }
+    }
+  }
+}

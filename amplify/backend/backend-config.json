@@ -1,0 +1,10 @@
+{
+  "auth": {
+    "xeniappwebapp8224bf90": {
+      "service": "Cognito",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "customAuth": false
+    }
+  }
+}

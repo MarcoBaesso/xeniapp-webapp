@@ -2,7 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
+import Amplify, { Auth } from 'aws-amplify';
+import awsconfig from './aws-exports';
 import reportWebVitals from './reportWebVitals';
+
+// TODO: crea dei file awsconfig specifici per ambiente
+Amplify.configure(awsconfig);
 
 ReactDOM.render(
   <React.StrictMode>
