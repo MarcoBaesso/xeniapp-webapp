@@ -3,6 +3,19 @@ import React from 'react';
 import './App.css';
 import { withAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
 import {Auth} from 'aws-amplify';
+import Prenotazioni from './routes/prenotazioni';
+import {
+  Switch,
+  Route,
+  Link
+} from "react-router-dom";
+import Container from '@material-ui/core/Container';
+
+function Home() {
+  return <h2>Home</h2>;
+}
+
+// https://medium.com/@ryoldash/customize-webpack-config-of-react-app-created-with-create-react-app-7a78c7849edc
 
 class App extends React.Component {
 
@@ -11,7 +24,7 @@ class App extends React.Component {
     this.state = {};
   }
   
-  async componentDidMount(){
+  componentDidMount(){
     // https://docs.amplify.aws/lib/restapi/authz/q/platform/js#unauthenticated-requests
     /*const id= await Auth.currentSession().getIdToken().getJwtToken();
     this.setState({ id: id });
@@ -22,7 +35,31 @@ class App extends React.Component {
   render() {
     return (
       <div className="App">
-        {this.state.id}
+        <div>
+          <nav>
+            <ul>
+              <li>
+                <Link to="/">Home</Link>
+              </li>
+              <li>
+                <Link to="/prenotazioni">Prenotazioni</Link>
+              </li>
+            </ul>
+          </nav>
+
+          {/* A <Switch> looks through its children <Route>s and
+              renders the first one that matches the current URL. */}
+          <Container>
+            <Switch>
+              <Route exact path="/">
+                <Home />
+              </Route>
+              <Route path="/prenotazioni">
+                <Prenotazioni />
+              </Route>
+            </Switch>
+          </Container>
+        </div>
       </div>
     );
   }

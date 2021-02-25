@@ -7,6 +7,9 @@ import awsconfig from './aws-exports';
 import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux';
 import store from './store';
+import {
+  BrowserRouter as Router
+} from "react-router-dom";
 
 // TODO: crea dei file awsconfig specifici per ambiente
 Amplify.configure(awsconfig);
@@ -16,7 +19,9 @@ Amplify.configure(awsconfig);
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      <App />
+      <Router>
+        <App />
+      </Router>
     </Provider>
   </React.StrictMode>,
   document.getElementById('root')
