@@ -1,7 +1,7 @@
 import React from 'react';
 import Grid from '@material-ui/core/Grid';
-import { range, map, groupBy, keys, flatten, head } from 'ramda';
-import styles from '../prenotazioni/index.module.scss';
+import { range, map, groupBy, keys, flatten, head, isNil, isEmpty } from 'ramda';
+import styles from '../calendarioPrenotazioni/index.module.scss';
 //import { makeStyles } from '@material-ui/core/styles';
 import { styled } from '@material-ui/core/styles';
 
@@ -17,7 +17,7 @@ import { connect } from 'react-redux';
 
 import * as DettaglioPrenotazioniActionCreators from '../../actions/dettaglioPrenotazioniActionCreators';
 
-class Prenotazioni extends React.Component {
+class CalendarioPrenotazioni extends React.Component {
 
     constructor(props) {
         super(props);
@@ -34,12 +34,16 @@ class Prenotazioni extends React.Component {
 
     goToDettaglioPrenotazione(numDay){
         // todo route to dettaglio prenotazione
+        if (isNil(this.state.calendar[numDay]) || isEmpty(this.state.calendar[numDay])){
+            return;
+        }
         const prenotazioni= map(item => item.prenotazione, this.state.calendar[numDay]);
+
         const date= head(map(item => item.date, this.state.calendar[numDay]));
         const { dispatch } = this.props;
         let action = DettaglioPrenotazioniActionCreators.set({prenotazioni: prenotazioni, date: date});
         dispatch(action);
-        this.props.history.push('/dettaglioPrenotazioni');
+        this.props.history.push('/prenotazioniDelGiorno');
     }
 
     getDay(numDay){
@@ -125,4 +129,4 @@ class Prenotazioni extends React.Component {
     }
 }
 //https://react-redux.js.org/using-react-redux/connect-mapdispatch
-export default connect()(Prenotazioni);
+export default connect()(CalendarioPrenotazioni);

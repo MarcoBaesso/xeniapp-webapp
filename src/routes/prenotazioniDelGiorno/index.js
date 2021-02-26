@@ -1,7 +1,7 @@
 import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import { head, filter, includes, range, map, groupBy, keys, flatten, isNil, isEmpty } from 'ramda';
-import styles from '../prenotazioni/index.module.scss';
+import styles from '../prenotazioniDelGiorno/index.module.scss';
 //import { makeStyles } from '@material-ui/core/styles';
 import { styled } from '@material-ui/core/styles';
 
@@ -15,7 +15,7 @@ import PrenotazioniService from '../../services/prenotazioni';
 
 import { connect } from 'react-redux';
 
-class DettaglioPrenotazioni extends React.Component {
+class PrenotazioniDelGiorno extends React.Component {
 
     constructor(props) {
         super(props);
@@ -101,4 +101,4 @@ function mapStateToProps(state) {
     return { dettaglioPrenotazioni: dettaglioPrenotazioni }
 }
 
-export default connect(mapStateToProps)(DettaglioPrenotazioni);
+export default connect(mapStateToProps)(PrenotazioniDelGiorno);
