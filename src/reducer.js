@@ -1,9 +1,9 @@
 import { combineReducers } from 'redux';
 import todos from './reducers/todos';
-import dettaglioPrenotazioni from './reducers/dettaglioPrenotazioni';
+import prenotazioniDelGiorno from './reducers/prenotazioniDelGiorno';
 
 export default combineReducers({
-  dettaglioPrenotazioni,
+  prenotazioniDelGiorno,
   todos/*,
   counter*/
 })

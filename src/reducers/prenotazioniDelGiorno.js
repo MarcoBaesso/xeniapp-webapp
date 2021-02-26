@@ -1,4 +1,4 @@
-export default function dettaglioPrenotazioni(state = {}, action) {
+export default function prenotazioniDelGiorno(state = {}, action) {
     switch (action.type) {
       case 'SET':
         state.prenotazioni= action.prenotazioni;

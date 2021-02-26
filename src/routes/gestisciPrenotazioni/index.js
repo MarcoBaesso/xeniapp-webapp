@@ -15,7 +15,7 @@ import PrenotazioniService from '../../services/prenotazioni';
 
 import { connect } from 'react-redux';
 
-import * as DettaglioPrenotazioniActionCreators from '../../actions/dettaglioPrenotazioniActionCreators';
+import * as DettaglioPrenotazioniActionCreators from '../../actions/prenotazioniDelGiornoActionCreators';
 
 class GestisciPrenotazioni extends React.Component {
 
