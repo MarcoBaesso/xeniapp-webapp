@@ -25,8 +25,8 @@ class PrenotazioniDelGiorno extends React.Component {
     }
 
     checkDettaglioPrenotazioneIsAvailable(data){
-        if (isNil(data) || isNil(data.dettaglioPrenotazioni) || isEmpty(data.dettaglioPrenotazioni)){
-            this.props.history.push('/prenotazioni');
+        if (isNil(data) || isNil(data.prenotazioniDelGiorno) || isEmpty(data.prenotazioniDelGiorno)){
+            this.props.history.push('/calendarioPrenotazioni');
             return false;
         }
         return true;
@@ -39,16 +39,16 @@ class PrenotazioniDelGiorno extends React.Component {
     async componentDidMount(){
         if (this.checkDettaglioPrenotazioneIsAvailable(this.props)){
 
-            const dettaglioPrenotazioni= this.props.dettaglioPrenotazioni;
+            const prenotazioniDelGiorno= this.props.prenotazioniDelGiorno;
             const orariPacchetti= flatten(map(dettaglioPrenotazione => {
                 return map(pacchetto => {
                     return {
                         servizio: dettaglioPrenotazione.servizio,
                         pacchetto: pacchetto,
-                        fasciaOraria: pacchetto.dettaglioPacchetto[dettaglioPrenotazioni.date]
+                        fasciaOraria: pacchetto.dettaglioPacchetto[prenotazioniDelGiorno.date]
                     }
-                }, filter(pacchetto => includes(dettaglioPrenotazioni.date, keys(pacchetto.dettaglioPacchetto)),dettaglioPrenotazione.pacchetti));
-            }, flatten(map(item => item.dettaglioPrenotazioni, dettaglioPrenotazioni.prenotazioni))));
+                }, filter(pacchetto => includes(prenotazioniDelGiorno.date, keys(pacchetto.dettaglioPacchetto)),dettaglioPrenotazione.pacchetti));
+            }, flatten(map(item => item.dettaglioPrenotazioni, prenotazioniDelGiorno.prenotazioni))));
 
             const groupByIdServizio= groupBy(item => {
                 return item.servizio.id;
@@ -97,8 +97,8 @@ class PrenotazioniDelGiorno extends React.Component {
 }
 
 function mapStateToProps(state) {
-    const { dettaglioPrenotazioni } = state
-    return { dettaglioPrenotazioni: dettaglioPrenotazioni }
+    const { prenotazioniDelGiorno } = state
+    return { prenotazioniDelGiorno: prenotazioniDelGiorno }
 }
 
 export default connect(mapStateToProps)(PrenotazioniDelGiorno);

@@ -15,7 +15,7 @@ import PrenotazioniService from '../../services/prenotazioni';
 
 import { connect } from 'react-redux';
 
-import * as DettaglioPrenotazioniActionCreators from '../../actions/prenotazioniDelGiornoActionCreators';
+import * as PrenotazioniDelGiornoActionCreators from '../../actions/prenotazioniDelGiornoActionCreators';
 
 class CalendarioPrenotazioni extends React.Component {
 
@@ -41,7 +41,7 @@ class CalendarioPrenotazioni extends React.Component {
 
         const date= head(map(item => item.date, this.state.calendar[numDay]));
         const { dispatch } = this.props;
-        let action = DettaglioPrenotazioniActionCreators.set({prenotazioni: prenotazioni, date: date});
+        let action = PrenotazioniDelGiornoActionCreators.set({prenotazioni: prenotazioni, date: date});
         dispatch(action);
         this.props.history.push('/prenotazioniDelGiorno');
     }
