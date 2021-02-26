@@ -1,6 +1,6 @@
 import React from 'react';
 import Grid from '@material-ui/core/Grid';
-import { range, map, groupBy, keys, flatten } from 'ramda';
+import { range, map, groupBy, keys, flatten, head } from 'ramda';
 import styles from '../prenotazioni/index.module.scss';
 //import { makeStyles } from '@material-ui/core/styles';
 import { styled } from '@material-ui/core/styles';
@@ -13,6 +13,9 @@ import Typography from '@material-ui/core/Typography';
 import PrenotazioniService from '../../services/prenotazioni';
 // https://www.robinwieruch.de/react-css-styling
 
+import { connect } from 'react-redux';
+
+import * as DettaglioPrenotazioniActionCreators from '../../actions/dettaglioPrenotazioniActionCreators';
 
 class Prenotazioni extends React.Component {
 
@@ -20,9 +23,9 @@ class Prenotazioni extends React.Component {
         super(props);
         this.state = {
             numDays: [],
-            calendar: {},
-            prenotazioni: []
+            calendar: {}
         };
+        this.prenotazioni= [];
         this.prenotazioniService= new PrenotazioniService();
         this.getDay= this.getDay.bind(this);
         this.getNumPrenotazioni= this.getNumPrenotazioni.bind(this);
@@ -31,6 +34,12 @@ class Prenotazioni extends React.Component {
 
     goToDettaglioPrenotazione(numDay){
         // todo route to dettaglio prenotazione
+        const prenotazioni= map(item => item.prenotazione, this.state.calendar[numDay]);
+        const date= head(map(item => item.date, this.state.calendar[numDay]));
+        const { dispatch } = this.props;
+        let action = DettaglioPrenotazioniActionCreators.set({prenotazioni: prenotazioni, date: date});
+        dispatch(action);
+        this.props.history.push('/dettaglioPrenotazioni');
     }
 
     getDay(numDay){
@@ -52,22 +61,21 @@ class Prenotazioni extends React.Component {
             numMonth: numMonth
         })
 
-        const prenotazioniResponse= await this.prenotazioniService.get(0);
+        this.prenotazioni= (await this.prenotazioniService.get(0)).prenotazioni;
 
         const listMapDataPrenotazione= flatten(map((prenotazioneUtente) => {
             return flatten(map(prenotazione => {
                 const date= map(item => item, flatten(map(pacchetto => keys(pacchetto.dettaglioPacchetto), prenotazione.pacchetti)));
                 return map(data => {
-                    return {"data": data, "prenotazione": prenotazione};
-                }, date)} , prenotazioneUtente.prenotazioni));
-        }, prenotazioniResponse.prenotazioni));
+                    return {"date": data, "prenotazione": prenotazioneUtente};
+                }, date)} , prenotazioneUtente.dettaglioPrenotazioni));
+        }, this.prenotazioni));
 
         const calendarData= groupBy((entry) => {
-            return new Date(Date.parse(entry.data)).getDate();
+            return new Date(Date.parse(entry.date)).getDate();
         })(listMapDataPrenotazione);
 
         this.setState({
-            prenotazioni : prenotazioniResponse.prenotazioni,
             calendar: calendarData
         });
         
@@ -116,5 +124,5 @@ class Prenotazioni extends React.Component {
         )
     }
 }
-
-export default Prenotazioni;
+//https://react-redux.js.org/using-react-redux/connect-mapdispatch
+export default connect()(Prenotazioni);

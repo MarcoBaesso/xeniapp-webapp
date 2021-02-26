@@ -4,6 +4,7 @@ import './App.css';
 import { withAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
 import {Auth} from 'aws-amplify';
 import Prenotazioni from './routes/prenotazioni';
+import DettaglioPrenotazioni from './routes/dettaglioPrenotazioni';
 import {
   Switch,
   Route,
@@ -51,12 +52,9 @@ class App extends React.Component {
               renders the first one that matches the current URL. */}
           <Container>
             <Switch>
-              <Route exact path="/">
-                <Home />
-              </Route>
-              <Route path="/prenotazioni">
-                <Prenotazioni />
-              </Route>
+              <Route exact path="/" component={Home} />
+              <Route path="/prenotazioni" component={Prenotazioni} />
+              <Route path="/dettaglioPrenotazioni" component={DettaglioPrenotazioni} />
             </Switch>
           </Container>
         </div>
