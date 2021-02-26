@@ -5,6 +5,7 @@ import { withAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react';
 import {Auth} from 'aws-amplify';
 import CalendarioPrenotazioni from './routes/calendarioPrenotazioni';
 import PrenotazioniDelGiorno from './routes/prenotazioniDelGiorno';
+import GestisciPrenotazioni from './routes/gestisciPrenotazioni';
 import {
   Switch,
   Route,
@@ -45,6 +46,9 @@ class App extends React.Component {
               <li>
                 <Link to="/calendarioPrenotazioni">Calendario prenotazioni</Link>
               </li>
+              <li>
+                <Link to="/gestisciPrenotazioni">Gestisci prenotazioni</Link>
+              </li>
             </ul>
           </nav>
 
@@ -55,6 +59,7 @@ class App extends React.Component {
               <Route exact path="/" component={Home} />
               <Route path="/calendarioPrenotazioni" component={CalendarioPrenotazioni} />
               <Route path="/prenotazioniDelGiorno" component={PrenotazioniDelGiorno} />
+              <Route path="/gestisciPrenotazioni" component={GestisciPrenotazioni} />
             </Switch>
           </Container>
         </div>
