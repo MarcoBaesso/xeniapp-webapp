@@ -58,9 +58,11 @@ class CalendarioPrenotazioni extends React.Component {
 
     async componentDidMount(){
         const today= new Date();
-        const numMonth= today.getMonth()+1;
+        const numMonth= 2;// FIXME MOCK today.getMonth()+1;
         const numDays= new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
         this.prenotazioni= (await this.prenotazioniService.get(['VALIDA'],numMonth)).prenotazioni;
+
+        console.log(this.prenotazioni);
 
         const listMapDataPrenotazione= flatten(map((prenotazioneUtente) => {
             return flatten(map(prenotazione => {

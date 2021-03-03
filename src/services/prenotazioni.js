@@ -3,6 +3,9 @@
 import {Auth} from 'aws-amplify';
 import { keys, forEach } from 'ramda';
 
+import store from '../store';
+import * as Loading from '../actions/loading';
+
 class PrenotazioniService {
     //https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
     async get(stati, mese){
@@ -12,6 +15,10 @@ class PrenotazioniService {
               Authorization: `Bearer ${(await Auth.currentSession()).getIdToken().getJwtToken()}`,
             },
           };*/
+          try{
+        
+        store.dispatch(Loading.increment());
+
         const url = new URL("http://localhost:3000/Prod/struttura/prenotazione");
         const params = {stati: stati, mese: mese};
         forEach(param => url.searchParams.append(param, params[param]), keys(params));
@@ -29,7 +36,11 @@ class PrenotazioniService {
             redirect: 'follow', // manual, *follow, error
             referrerPolicy: 'strict-origin-when-cross-origin', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
           });
-          return response.json(); // parses JSON response into native JavaScript objects        
+          store.dispatch(Loading.decrement());
+          return response.json(); // parses JSON response into native JavaScript objects       
+        } catch (e){
+          store.dispatch(Loading.decrement()); 
+        }
     }
 
     async updateStato(emailUtente, idPrenotazione, statoPrenotazione, motivoRifiuto){
@@ -39,6 +50,9 @@ class PrenotazioniService {
               Authorization: `Bearer ${(await Auth.currentSession()).getIdToken().getJwtToken()}`,
             },
           };*/
+          try{
+        
+            store.dispatch(Loading.increment());
         const url = new URL("http://localhost:3000/Prod/struttura/prenotazione");
 
         const response = await fetch(url, {
@@ -62,8 +76,12 @@ class PrenotazioniService {
             })
           });
 
+          store.dispatch(Loading.decrement());
           return response.ok; // parses JSON response into native JavaScript objects        
-    }
+        } catch (e){
+          store.dispatch(Loading.decrement()); 
+        }
+      }
 
 }
 

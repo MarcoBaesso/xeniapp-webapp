@@ -13,6 +13,7 @@ import {
 } from "react-router-dom";
 import Container from '@material-ui/core/Container';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { connect } from 'react-redux';
 
 function Home() {
   return <h2>Home</h2>;
@@ -34,8 +35,17 @@ class App extends React.Component {
     */
   }
 
+  /*
+  shouldComponentUpdate(propsSuccessive, stateSuccessivo){
+    console.log(propsSuccessive);
+    console.log(stateSuccessivo);
+    return true;
+  }
+  */
+
 
   render() {
+    const {loading} = this.props;
     return (
       <div className="App">
         <div>
@@ -56,11 +66,14 @@ class App extends React.Component {
           {/* A <Switch> looks through its children <Route>s and
               renders the first one that matches the current URL. */}
           <Container>
-            <div className="spinnerContainer">
-              <div className="spinner">
-                <CircularProgress disableShrink />
+            {
+              loading.counter>0 &&
+              <div className="spinnerContainer">
+                <div className="spinner">
+                  <CircularProgress disableShrink />
+                </div>
               </div>
-            </div>
+            }
             <Switch>
               <Route exact path="/" component={Home} />
               <Route path="/calendarioPrenotazioni" component={CalendarioPrenotazioni} />
@@ -77,7 +90,12 @@ class App extends React.Component {
 /*      <AmplifySignOut />
  */
 
-export default withAuthenticator(App);
+function mapStateToProps(state) {
+  const { loading } = state
+  return { loading: loading }
+}
+
+export default withAuthenticator(connect(mapStateToProps)(App));
 
 /*
       <header className="App-header">

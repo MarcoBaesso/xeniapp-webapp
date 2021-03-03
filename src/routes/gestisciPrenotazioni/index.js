@@ -69,9 +69,9 @@ class GestisciPrenotazioni extends React.Component {
 
     async refreshPrenotazioni(){
         const today= new Date();
-        const numMonth= 2;//today.getMonth()+1;
+        const numMonth= 2; // FIXME MOCK today.getMonth()+1;
         const prenotazioni= (await this.prenotazioniService.get(['IN_LAVORAZIONE'],numMonth)).prenotazioni;
-        console.log(prenotazioni);
+
         this.setState({
             prenotazioni: prenotazioni
         });
