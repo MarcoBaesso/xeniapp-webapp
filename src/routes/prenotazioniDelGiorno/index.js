@@ -58,13 +58,9 @@ class PrenotazioniDelGiorno extends React.Component {
                 return item.id;
             }, map(item => item.servizio, orariPacchetti)));
 
-            console.log(hashServizi);
-
             const partitionedData= map(servizioPartitionData => {
                 return groupBy(item => item.fasciaOraria, servizioPartitionData);
             }, groupByIdServizio);
-
-            console.log(partitionedData);
 
             this.hashServizi= hashServizi;
 

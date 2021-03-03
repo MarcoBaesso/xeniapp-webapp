@@ -12,6 +12,7 @@ import {
   Link
 } from "react-router-dom";
 import Container from '@material-ui/core/Container';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 function Home() {
   return <h2>Home</h2>;
@@ -55,6 +56,11 @@ class App extends React.Component {
           {/* A <Switch> looks through its children <Route>s and
               renders the first one that matches the current URL. */}
           <Container>
+            <div className="spinnerContainer">
+              <div className="spinner">
+                <CircularProgress disableShrink />
+              </div>
+            </div>
             <Switch>
               <Route exact path="/" component={Home} />
               <Route path="/calendarioPrenotazioni" component={CalendarioPrenotazioni} />

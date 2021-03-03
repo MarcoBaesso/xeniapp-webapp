@@ -60,12 +60,7 @@ class CalendarioPrenotazioni extends React.Component {
         const today= new Date();
         const numMonth= today.getMonth()+1;
         const numDays= new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
-        this.setState({
-            numDays: map((index) => {}, range(0,numDays)),
-            numMonth: numMonth
-        })
-
-        this.prenotazioni= (await this.prenotazioniService.get(0)).prenotazioni;
+        this.prenotazioni= (await this.prenotazioniService.get(['VALIDA'],numMonth)).prenotazioni;
 
         const listMapDataPrenotazione= flatten(map((prenotazioneUtente) => {
             return flatten(map(prenotazione => {
@@ -80,6 +75,8 @@ class CalendarioPrenotazioni extends React.Component {
         })(listMapDataPrenotazione);
 
         this.setState({
+            numDays: map((index) => {}, range(0,numDays)),
+            numMonth: numMonth,
             calendar: calendarData
         });
         

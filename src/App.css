@@ -2,6 +2,19 @@
   text-align: center;
 }
 
+.spinnerContainer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 999;
+}
+
+.spinner {
+  top: 30%;
+  position: relative;
+  margin: auto;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
