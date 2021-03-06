@@ -1,7 +1,9 @@
 import React from 'react';
 import Grid from '@material-ui/core/Grid';
-import { range, map, groupBy, keys, flatten, head, isNil, isEmpty } from 'ramda';
+import { range, map, groupBy, keys, flatten, head, isNil, isEmpty, filter, length } from 'ramda';
 import styles from '../calendarioPrenotazioni/index.module.scss';
+import { makeStyles } from "@material-ui/core/styles";
+
 //import { makeStyles } from '@material-ui/core/styles';
 import { styled } from '@material-ui/core/styles';
 
@@ -11,25 +13,62 @@ import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import PrenotazioniService from '../../services/prenotazioni';
+import Badge from "@material-ui/core/Badge";
+import Icon from "@material-ui/core/Icon";
+import IconButton from '@material-ui/core/IconButton';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowLeft, faArrowRight, faArrowsAltH } from '@fortawesome/free-solid-svg-icons'
+
+import green from '@material-ui/core/colors/green';
+import yellow from '@material-ui/core/colors/yellow';
+import lime from '@material-ui/core/colors/lime';
+
 // https://www.robinwieruch.de/react-css-styling
 
 import { connect } from 'react-redux';
 
 import * as PrenotazioniDelGiornoActionCreators from '../../actions/prenotazioniDelGiornoActionCreators';
+import BadgeValido from '../../components/badge/valido';
+import BadgeInLavorazione from '../../components/badge/inLavorazione';
+
+import BottomNavigation from '@material-ui/core/BottomNavigation';
+import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
 
 class CalendarioPrenotazioni extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            numDays: [],
-            calendar: {}
-        };
+
         this.prenotazioni= [];
         this.prenotazioniService= new PrenotazioniService();
         this.getDay= this.getDay.bind(this);
-        this.getNumPrenotazioni= this.getNumPrenotazioni.bind(this);
+        this.getNumPrenotazioniValide= this.getNumPrenotazioniValide.bind(this);
+        this.getNumPrenotazioniInLavorazione= this.getNumPrenotazioniInLavorazione.bind(this);
         this.goToDettaglioPrenotazione= this.goToDettaglioPrenotazione.bind(this);
+        this.navToMonth= this.navToMonth.bind(this);
+        this.getAnnoMeseFromState= this.getAnnoMeseFromState.bind(this);
+        this.calcolaNumDays= this.calcolaNumDays.bind(this);
+
+        const today= new Date();
+        const numDaysOfMonth= this.calcolaNumDays(today.getFullYear(),today.getMonth()+1);
+
+        this.state = {
+            numDaysOfMonth: numDaysOfMonth,
+            numDays: map((index) => {}, range(0,numDaysOfMonth)),
+            numMonth: today.getMonth()+1,
+            numYear: today.getFullYear(),
+            calendar: {},
+            navigation: 1
+        };
+    }
+
+    calcolaNumDays(numYear,numMonth){
+        return new Date(numYear, numMonth, 0).getDate();
+    }
+
+    getAnnoMeseFromState(){
+        return this.state.numYear + (this.state.numMonth<10? '0' + this.state.numMonth : this.state.numMonth);
     }
 
     goToDettaglioPrenotazione(numDay){
@@ -52,15 +91,20 @@ class CalendarioPrenotazioni extends React.Component {
         return day + '/' + month;
     }
 
-    getNumPrenotazioni(numDay){
-        return this.state.calendar[numDay]? this.state.calendar[numDay].length : 0;
+    getNumPrenotazioniValide(numDay){
+        return this.state.calendar[numDay]? length(filter((item) => item.prenotazione.stato=='VALIDA', this.state.calendar[numDay])) : 0;
+    }
+
+    getNumPrenotazioniInLavorazione(numDay){
+        return this.state.calendar[numDay]? length(filter((item) => item.prenotazione.stato=='IN_LAVORAZIONE', this.state.calendar[numDay])) : 0;
     }
 
     async componentDidMount(){
         const today= new Date();
-        const numMonth= 2;// FIXME MOCK today.getMonth()+1;
+        const numMonth= today.getMonth()+1;
+        const annoMese= today.getFullYear() + '-' + (numMonth<10? '0' + numMonth : numMonth);
         const numDays= new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
-        this.prenotazioni= (await this.prenotazioniService.get(['VALIDA'],numMonth)).prenotazioni;
+        this.prenotazioni= (await this.prenotazioniService.get(['VALIDA', 'IN_LAVORAZIONE'],annoMese)).prenotazioni;
 
         console.log(this.prenotazioni);
 
@@ -83,12 +127,38 @@ class CalendarioPrenotazioni extends React.Component {
         });
         
     }
+
+    setCalendar(){
+
+    }
+
+    navToMonth(itemToNav){
+        //const fromNumMonth
+        this.setState({
+            navigation: itemToNav
+        });
+    }
+
     //className={style.root}
     render() {
         const self= this;
+        const styles = theme => ({
+            margin: {
+              margin: theme.spacing.unit * 2
+            },
+            customBadge: {
+              backgroundColor: green,
+              color: "white"
+            }
+          });
         return (
             <div className={styles.root}>
-                <Grid container spacing={1}>
+                 <BottomNavigation value={self.state.navigation} onChange={(event, newValue) => self.itemToNav(newValue)} showLabels>
+                    <BottomNavigationAction label="Mese precedente" icon={<FontAwesomeIcon icon={faArrowLeft} />} />
+                    <BottomNavigationAction label={self.state.navigation==1? "Mese in corso" : "Torna a mese in corso"} icon={<FontAwesomeIcon icon={faArrowsAltH} />} />
+                    <BottomNavigationAction label="Prossimo mese" icon={<FontAwesomeIcon icon={faArrowRight} />} />
+                </BottomNavigation>
+                <Grid container spacing={0}>
                     {
                         this.state.numDays.map(function(value,index){
                             return (<Grid key={index} item xs={2}>
@@ -98,13 +168,18 @@ class CalendarioPrenotazioni extends React.Component {
                                                 {  self.getDay(index+1) }
                                                 </Typography>
                                                 
-                                                <Button onClick={() => { self.goToDettaglioPrenotazione(index+1); }}>
-                                                    { self.getNumPrenotazioni(index+1) }
-                                                </Button>
                                                 
-                                                <Typography className={styles.pos} color="textSecondary">
-                                                prenotazioni
-                                                </Typography>
+                                                <IconButton onClick={() => { self.goToDettaglioPrenotazione(index+1); }} onaria-label="valide">
+                                                    <BadgeValido badgeContent={self.getNumPrenotazioniValide(index+1)}></BadgeValido>
+                                                </IconButton>
+                                                <IconButton onClick={() => { self.goToDettaglioPrenotazione(index+1); }} aria-label="in lavorazione">
+                                                    <BadgeInLavorazione badgeContent={self.getNumPrenotazioniInLavorazione(index+1)}></BadgeInLavorazione>
+                                                </IconButton>
+                                                {/*
+                                                    <Button onClick={() => { self.goToDettaglioPrenotazione(index+1); }}>
+                                                        { self.getNumPrenotazioniValide(index+1) }
+                                                    </Button>
+                                                */}
                                                 {/*
                                                 <Typography variant="body2" component="p">
                                                 well meaning and kindly.

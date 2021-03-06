@@ -6,7 +6,7 @@ import { keys, forEach } from 'ramda';
 import store from '../store';
 import * as Loading from '../actions/loading';
 
-class PrenotazioniService {
+class ViaggiService {
     //https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
     async get(stati, annoMese){
       /*
@@ -19,7 +19,7 @@ class PrenotazioniService {
         
         store.dispatch(Loading.increment());
 
-        const url = new URL("http://localhost:3000/Prod/struttura/prenotazione");
+        const url = new URL("http://localhost:3000/Prod/struttura/viaggio");
         const params = {stati: stati, annoMese: annoMese};
         forEach(param => url.searchParams.append(param, params[param]), keys(params));
 
@@ -43,17 +43,12 @@ class PrenotazioniService {
         }
     }
 
+    /*
     async updateStato(emailUtente, idPrenotazione, statoPrenotazione, motivoRifiuto){
-      /*
-        const myInit = { 
-            headers: { 
-              Authorization: `Bearer ${(await Auth.currentSession()).getIdToken().getJwtToken()}`,
-            },
-          };*/
           try{
         
             store.dispatch(Loading.increment());
-        const url = new URL("http://localhost:3000/Prod/struttura/prenotazione");
+        const url = new URL("http://localhost:3000/Prod/struttura/viaggio");
 
         const response = await fetch(url, {
             method: 'POST', // *GET, POST, PUT, DELETE, etc.
@@ -81,8 +76,8 @@ class PrenotazioniService {
         } catch (e){
           store.dispatch(Loading.decrement()); 
         }
-      }
+      }*/
 
 }
 
-export default PrenotazioniService;
+export default ViaggiService;
