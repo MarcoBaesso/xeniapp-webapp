@@ -14,6 +14,7 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import PrenotazioniService from '../../services/prenotazioni';
 import Badge from "@material-ui/core/Badge";
+import Paper from "@material-ui/core/Paper";
 import Icon from "@material-ui/core/Icon";
 import IconButton from '@material-ui/core/IconButton';
 
@@ -46,14 +47,17 @@ class CalendarioPrenotazioni extends React.Component {
         this.getNumPrenotazioniValide= this.getNumPrenotazioniValide.bind(this);
         this.getNumPrenotazioniInLavorazione= this.getNumPrenotazioniInLavorazione.bind(this);
         this.goToDettaglioPrenotazione= this.goToDettaglioPrenotazione.bind(this);
-        this.navToMonth= this.navToMonth.bind(this);
+        this.navToPeriod= this.navToPeriod.bind(this);
         this.getAnnoMeseFromState= this.getAnnoMeseFromState.bind(this);
         this.calcolaNumDays= this.calcolaNumDays.bind(this);
+        this.refreshPrenotazioni= this.refreshPrenotazioni.bind(this);
+        this.calcolaNuovoPeriodoCalendario= this.calcolaNuovoPeriodoCalendario.bind(this);
 
         const today= new Date();
         const numDaysOfMonth= this.calcolaNumDays(today.getFullYear(),today.getMonth()+1);
 
         this.state = {
+            today: today,
             numDaysOfMonth: numDaysOfMonth,
             numDays: map((index) => {}, range(0,numDaysOfMonth)),
             numMonth: today.getMonth()+1,
@@ -67,8 +71,8 @@ class CalendarioPrenotazioni extends React.Component {
         return new Date(numYear, numMonth, 0).getDate();
     }
 
-    getAnnoMeseFromState(){
-        return this.state.numYear + (this.state.numMonth<10? '0' + this.state.numMonth : this.state.numMonth);
+    getAnnoMeseFromState(numYear,numMonth){
+        return numYear + "-" + (numMonth<10? '0' + numMonth : numMonth);
     }
 
     goToDettaglioPrenotazione(numDay){
@@ -88,7 +92,7 @@ class CalendarioPrenotazioni extends React.Component {
     getDay(numDay){
         const day= numDay<10? '0' + numDay : '' + numDay;
         const month= this.state.numMonth<10? '0' + this.state.numMonth : '' + this.state.numMonth;
-        return day + '/' + month;
+        return (this.state.today.getFullYear()==this.state.numYear)? day + '/' + month : day + '/' + month + '/' + this.state.numYear;
     }
 
     getNumPrenotazioniValide(numDay){
@@ -99,12 +103,10 @@ class CalendarioPrenotazioni extends React.Component {
         return this.state.calendar[numDay]? length(filter((item) => item.prenotazione.stato=='IN_LAVORAZIONE', this.state.calendar[numDay])) : 0;
     }
 
-    async componentDidMount(){
-        const today= new Date();
-        const numMonth= today.getMonth()+1;
-        const annoMese= today.getFullYear() + '-' + (numMonth<10? '0' + numMonth : numMonth);
-        const numDays= new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
-        this.prenotazioni= (await this.prenotazioniService.get(['VALIDA', 'IN_LAVORAZIONE'],annoMese)).prenotazioni;
+    async refreshPrenotazioni(numYear,numMonth){
+        const numDaysOfMonth= this.calcolaNumDays(numYear,numMonth);
+
+        this.prenotazioni= (await this.prenotazioniService.get(['VALIDA', 'IN_LAVORAZIONE'], this.getAnnoMeseFromState(numYear, numMonth))).prenotazioni;
 
         console.log(this.prenotazioni);
 
@@ -121,22 +123,66 @@ class CalendarioPrenotazioni extends React.Component {
         })(listMapDataPrenotazione);
 
         this.setState({
-            numDays: map((index) => {}, range(0,numDays)),
+            calendar: calendarData,
+            numDaysOfMonth: numDaysOfMonth,
+            numDays: map((index) => {}, range(0,numDaysOfMonth)),
             numMonth: numMonth,
-            calendar: calendarData
+            numYear: numYear
         });
-        
     }
 
-    setCalendar(){
+    async componentDidMount(){
+        this.refreshPrenotazioni(this.state.numYear, this.state.numMonth);
+    }
+
+    calcolaNuovoPeriodoCalendario(moveByPosition){
+        switch (moveByPosition){
+            case 0: {
+                return {
+                    numMonth: this.state.today.getMonth()+1,
+                    numYear: this.state.today.getFullYear()
+                };
+            }
+            case -1: {
+                if (this.state.numMonth==1){
+                    return {
+                        numMonth: 12,
+                        numYear: this.state.numYear-1
+                    }
+                } else {
+                    return {
+                        numMonth: this.state.numMonth-1,
+                        numYear: this.state.numYear
+                    }
+                }
+            }
+            case 1: {
+                if (this.state.numMonth==12){
+                    return {
+                        numMonth: 1,
+                        numYear: this.state.numYear+1
+                    }
+                } else {
+                    return {
+                        numMonth: this.state.numMonth+1,
+                        numYear: this.state.numYear
+                    }
+                }
+            }
+        }
 
     }
 
-    navToMonth(itemToNav){
-        //const fromNumMonth
+    navToPeriod(itemToNav){
+        //const numMonth= this.state.numMonth;
+        //const numYear= this.state.numYear;
+
+        const nuovoPeriodo= this.calcolaNuovoPeriodoCalendario(itemToNav==0? -1 : (itemToNav==2? 1 : 0));
+
         this.setState({
             navigation: itemToNav
         });
+        this.refreshPrenotazioni(nuovoPeriodo.numYear, nuovoPeriodo.numMonth);
     }
 
     //className={style.root}
@@ -153,7 +199,7 @@ class CalendarioPrenotazioni extends React.Component {
           });
         return (
             <div className={styles.root}>
-                 <BottomNavigation value={self.state.navigation} onChange={(event, newValue) => self.itemToNav(newValue)} showLabels>
+                 <BottomNavigation value={self.state.navigation} onChange={(event, newValue) => self.navToPeriod(newValue)} showLabels>
                     <BottomNavigationAction label="Mese precedente" icon={<FontAwesomeIcon icon={faArrowLeft} />} />
                     <BottomNavigationAction label={self.state.navigation==1? "Mese in corso" : "Torna a mese in corso"} icon={<FontAwesomeIcon icon={faArrowsAltH} />} />
                     <BottomNavigationAction label="Prossimo mese" icon={<FontAwesomeIcon icon={faArrowRight} />} />
