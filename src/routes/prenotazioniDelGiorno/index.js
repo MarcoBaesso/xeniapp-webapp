@@ -30,6 +30,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 // https://www.robinwieruch.de/react-css-styling
 
+import RiepilogoOrdini from '../../components/riepilogo/ordini';
 import { connect } from 'react-redux';
 
 class PrenotazioniDelGiorno extends React.Component {
@@ -37,10 +38,10 @@ class PrenotazioniDelGiorno extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            open: -1
+            open: -1,
+            viewRiepilogo: false
         };
         this.checkDettaglioPrenotazioneIsAvailable= this.checkDettaglioPrenotazioneIsAvailable.bind(this);
-        this.handleClickItemServizio= this.handleClickItemServizio.bind(this);
     }
 
     checkDettaglioPrenotazioneIsAvailable(data){
@@ -55,96 +56,18 @@ class PrenotazioniDelGiorno extends React.Component {
         return this.checkDettaglioPrenotazioneIsAvailable(propsSuccessive);
     }
 
-    handleClickItemServizio(index){
-        this.setState({
-            open: this.state.open==index? -1 : index
-        })
-    }
-
     async componentDidMount(){
-        if (this.checkDettaglioPrenotazioneIsAvailable(this.props)){
-
-            const prenotazioniDelGiorno= this.props.prenotazioniDelGiorno;
-            const orariPacchetti= flatten(map(dettaglioPrenotazione => {
-                return map(pacchetto => {
-                    return {
-                        servizio: dettaglioPrenotazione.servizio,
-                        pacchetto: pacchetto,
-                        fasciaOraria: pacchetto.dettaglioPacchetto[prenotazioniDelGiorno.date]
-                    }
-                }, filter(pacchetto => includes(prenotazioniDelGiorno.date, keys(pacchetto.dettaglioPacchetto)),dettaglioPrenotazione.pacchetti));
-            }, flatten(map(item => item.dettaglioPrenotazioni, prenotazioniDelGiorno.prenotazioni))));
-
-            const groupByIdServizio= groupBy(item => {
-                return item.servizio.id;
-            }, orariPacchetti);
-
-            const hashServizi= map(item => head(item), groupBy(item => {
-                return item.id;
-            }, map(item => item.servizio, orariPacchetti)));
-
-            const partitionedData= map(servizioPartitionData => {
-                return groupBy(item => item.fasciaOraria, servizioPartitionData);
-            }, groupByIdServizio);
-
-            this.hashServizi= hashServizi;
-
-            this.setState({
-                partitionedData: partitionedData
-            })
-
-            console.log(partitionedData)
-        }
+        this.setState({
+            viewRiepilogo: this.checkDettaglioPrenotazioneIsAvailable(this.props)
+        });
     }
 
     //className={style.root}
     render() {
         const self= this;
         return (
-            <List className={styles.root}>
-                {
-                    keys(self.state.partitionedData).map(function(keyServizio, index) {
-                        return (<Box>
-                            <ListItem button onClick={() => self.handleClickItemServizio(index)}>
-                                <ListItemText primary={self.hashServizi[keyServizio].descrizione} />
-                                {self.state.open==index ? <ExpandLess /> : <ExpandMore />}
-                            </ListItem>
-                            <Collapse in={self.state.open==index} timeout="auto" unmountOnExit>
-                                <TableContainer component={Paper}>
-                                    <Table aria-label="simple table">
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell align="center">Fascia oraria</TableCell>
-                                                <TableCell align="center">Num persone</TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {
-                                                keys(self.state.partitionedData[keyServizio]).map(function(valueOrario, index) {
-                                                    return (<TableRow key={index}>
-                                                                <TableCell component="th" scope="row">{valueOrario}</TableCell>
-                                                                <TableCell align="center">{self.state.partitionedData[keyServizio][valueOrario].length}</TableCell>
-                                                            </TableRow>
-                                                    )
-                                                })
-                                            }
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
-                            </Collapse>
-                        </Box>)
-                        /*
-                        return (<div key={keyServizio}>
-                            <span>{self.hashServizi[keyServizio].descrizione}</span>
-                            {
-                                keys(self.state.partitionedData[keyServizio]).map(function(valueOrario, index) {
-                                    return (<div key={valueOrario}>{valueOrario} : {self.state.partitionedData[keyServizio][valueOrario].length} </div>)
-                                })
-                            }
-                            </div>)*/
-                    })
-                }
-            </List>
+            self.state.viewRiepilogo &&
+            <RiepilogoOrdini data={self.props.prenotazioniDelGiorno.data} prenotazioni={self.props.prenotazioniDelGiorno.prenotazioni}></RiepilogoOrdini>
         )
     }
 }

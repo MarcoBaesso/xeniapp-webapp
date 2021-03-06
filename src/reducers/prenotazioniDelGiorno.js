@@ -3,7 +3,7 @@ export default function prenotazioniDelGiorno(state = {}, action) {
       case 'SET':
         return {
           prenotazioni: action.prenotazioni,
-          date: action.date
+          data: action.data
         };
       case 'GET':
         return state;

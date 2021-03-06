@@ -81,9 +81,9 @@ class CalendarioPrenotazioni extends React.Component {
         }
         const prenotazioni= map(item => item.prenotazione, this.state.calendar[numDay]);
 
-        const date= head(map(item => item.date, this.state.calendar[numDay]));
+        const data= head(map(item => item.data, this.state.calendar[numDay]));
         const { dispatch } = this.props;
-        let action = PrenotazioniDelGiornoActionCreators.set({prenotazioni: prenotazioni, date: date});
+        let action = PrenotazioniDelGiornoActionCreators.set({prenotazioni: prenotazioni, data: data});
         dispatch(action);
         this.props.history.push('/prenotazioniDelGiorno');
     }
@@ -113,12 +113,12 @@ class CalendarioPrenotazioni extends React.Component {
             return flatten(map(prenotazione => {
                 const date= map(item => item, flatten(map(pacchetto => keys(pacchetto.dettaglioPacchetto), prenotazione.pacchetti)));
                 return map(data => {
-                    return {"date": data, "prenotazione": prenotazioneUtente};
+                    return {"data": data, "prenotazione": prenotazioneUtente};
                 }, date)} , prenotazioneUtente.dettaglioPrenotazioni));
         }, prenotazioni));
 
         const calendarData= groupBy((entry) => {
-            return new Date(Date.parse(entry.date)).getDate();
+            return new Date(Date.parse(entry.data)).getDate();
         })(listMapDataPrenotazione);
 
         console.log(calendarData);

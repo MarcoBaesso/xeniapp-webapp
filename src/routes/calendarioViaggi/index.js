@@ -81,9 +81,9 @@ class CalendarioViaggi extends React.Component {
         }
         const prenotazioni= map(item => item.prenotazione, this.state.calendar[numDay]);
 
-        const date= head(map(item => item.date, this.state.calendar[numDay]));
+        const data= head(map(item => item.date, this.state.calendar[numDay]));
         const { dispatch } = this.props;
-        let action = PrenotazioniDelGiornoActionCreators.set({prenotazioni: prenotazioni, date: date});
+        let action = PrenotazioniDelGiornoActionCreators.set({prenotazioni: prenotazioni, data: data});
         dispatch(action);
         this.props.history.push('/prenotazioniDelGiorno');
     }

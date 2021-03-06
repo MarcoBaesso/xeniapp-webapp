@@ -1,8 +1,8 @@
-export function set({prenotazioni, date}) {
+export function set({prenotazioni, data}) {
     return {
         type: 'SET',
         prenotazioni: prenotazioni,
-        date: date
+        data: data
     }
 }
   
