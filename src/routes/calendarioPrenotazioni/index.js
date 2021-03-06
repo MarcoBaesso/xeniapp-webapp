@@ -41,7 +41,6 @@ class CalendarioPrenotazioni extends React.Component {
     constructor(props) {
         super(props);
 
-        this.prenotazioni= [];
         this.prenotazioniService= new PrenotazioniService();
         this.getDay= this.getDay.bind(this);
         this.getNumPrenotazioniValide= this.getNumPrenotazioniValide.bind(this);
@@ -106,9 +105,9 @@ class CalendarioPrenotazioni extends React.Component {
     async refreshPrenotazioni(numYear,numMonth){
         const numDaysOfMonth= this.calcolaNumDays(numYear,numMonth);
 
-        this.prenotazioni= (await this.prenotazioniService.get(['VALIDA', 'IN_LAVORAZIONE'], this.getAnnoMeseFromState(numYear, numMonth))).prenotazioni;
+        const prenotazioni= (await this.prenotazioniService.get(['VALIDA', 'IN_LAVORAZIONE'], this.getAnnoMeseFromState(numYear, numMonth))).prenotazioni;
 
-        console.log(this.prenotazioni);
+        console.log(prenotazioni);
 
         const listMapDataPrenotazione= flatten(map((prenotazioneUtente) => {
             return flatten(map(prenotazione => {
@@ -116,11 +115,13 @@ class CalendarioPrenotazioni extends React.Component {
                 return map(data => {
                     return {"date": data, "prenotazione": prenotazioneUtente};
                 }, date)} , prenotazioneUtente.dettaglioPrenotazioni));
-        }, this.prenotazioni));
+        }, prenotazioni));
 
         const calendarData= groupBy((entry) => {
             return new Date(Date.parse(entry.date)).getDate();
         })(listMapDataPrenotazione);
+
+        console.log(calendarData);
 
         this.setState({
             calendar: calendarData,
