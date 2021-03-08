@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
-import { head, filter, includes, range, map, groupBy, keys, flatten, isNil, isEmpty } from 'ramda';
+import { head, filter, includes, range, map, groupBy, keys, flatten, isNil, isEmpty, sum } from 'ramda';
 import styles from './index.module.scss';
 //import { makeStyles } from '@material-ui/core/styles';
 import { styled } from '@material-ui/core/styles';
@@ -39,6 +39,7 @@ class RiepilogoOrdini extends React.Component {
             open: -1
         };
         this.handleClickItemServizio= this.handleClickItemServizio.bind(this);
+        this.getNumPersone= this.getNumPersone.bind(this);
     }
 
     handleClickItemServizio(index){
@@ -97,6 +98,10 @@ class RiepilogoOrdini extends React.Component {
         console.log(partitionedData)
     }
 
+    getNumPersone(keyServizio, keyOrario){
+        return sum(map(item => item.pacchetto.numOrdini, this.state.partitionedData[keyServizio][keyOrario]))
+    }
+
     //className={style.root}
     render() {
         const self= this;
@@ -120,10 +125,10 @@ class RiepilogoOrdini extends React.Component {
                                         </TableHead>
                                         <TableBody>
                                             {
-                                                keys(self.state.partitionedData[keyServizio]).map(function(valueOrario, index) {
+                                                keys(self.state.partitionedData[keyServizio]).map(function(keyOrario, index) {
                                                     return (<TableRow key={index}>
-                                                                <TableCell component="th" scope="row">{valueOrario}</TableCell>
-                                                                <TableCell align="center">{self.state.partitionedData[keyServizio][valueOrario].length}</TableCell>
+                                                                <TableCell component="th" scope="row">{keyOrario}</TableCell>
+                                                                <TableCell align="center">{self.getNumPersone(keyServizio, keyOrario)}</TableCell>
                                                             </TableRow>
                                                     )
                                                 })
