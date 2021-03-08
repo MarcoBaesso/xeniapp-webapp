@@ -31,6 +31,7 @@ import TableRow from '@material-ui/core/TableRow';
 // https://www.robinwieruch.de/react-css-styling
 
 import RiepilogoOrdini from '../../components/riepilogo/ordini';
+import RiepilogoPrenotazioniInLavorazione from '../../components/riepilogo/prenotazione/inLavorazione'
 import { connect } from 'react-redux';
 
 class PrenotazioniDelGiorno extends React.Component {
@@ -38,10 +39,9 @@ class PrenotazioniDelGiorno extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            open: -1,
-            viewRiepilogo: false
         };
         this.checkDettaglioPrenotazioneIsAvailable= this.checkDettaglioPrenotazioneIsAvailable.bind(this);
+        this.handleUpdateAll= this.handleUpdateAll.bind(this);
     }
 
     checkDettaglioPrenotazioneIsAvailable(data){
@@ -52,22 +52,23 @@ class PrenotazioniDelGiorno extends React.Component {
         return true;
     }
 
-    shouldComponentUpdate(propsSuccessive, stateSuccessivo){
-        return this.checkDettaglioPrenotazioneIsAvailable(propsSuccessive);
+    handleUpdateAll(){
+        this.props.history.push('/calendarioPrenotazioni');        
     }
 
-    async componentDidMount(){
-        this.setState({
-            viewRiepilogo: this.checkDettaglioPrenotazioneIsAvailable(this.props)
-        });
+    shouldComponentUpdate(propsSuccessive, stateSuccessivo){
+        return this.checkDettaglioPrenotazioneIsAvailable(propsSuccessive);
     }
 
     //className={style.root}
     render() {
         const self= this;
         return (
-            self.state.viewRiepilogo &&
+            self.props.prenotazioniDelGiorno.stato=='VALIDO'?
             <RiepilogoOrdini data={self.props.prenotazioniDelGiorno.data} prenotazioni={self.props.prenotazioniDelGiorno.prenotazioni}></RiepilogoOrdini>
+            : (self.props.prenotazioniDelGiorno.stato=='IN_LAVORAZIONE'?
+            <RiepilogoPrenotazioniInLavorazione data={self.props.prenotazioniDelGiorno.data} prenotazioni={self.props.prenotazioniDelGiorno.prenotazioni} handleUpdateAll={() => this.handleUpdateAll()}></RiepilogoPrenotazioniInLavorazione> : <div></div>)
+
         )
     }
 }

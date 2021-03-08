@@ -74,7 +74,7 @@ class CalendarioPrenotazioni extends React.Component {
         return numYear + "-" + (numMonth<10? '0' + numMonth : numMonth);
     }
 
-    goToDettaglioPrenotazione(numDay){
+    goToDettaglioPrenotazione(numDay,stato){
         // todo route to dettaglio prenotazione
         if (isNil(this.state.calendar[numDay]) || isEmpty(this.state.calendar[numDay])){
             return;
@@ -83,7 +83,7 @@ class CalendarioPrenotazioni extends React.Component {
 
         const data= head(map(item => item.data, this.state.calendar[numDay]));
         const { dispatch } = this.props;
-        let action = PrenotazioniDelGiornoActionCreators.set({prenotazioni: prenotazioni, data: data});
+        let action = PrenotazioniDelGiornoActionCreators.set({prenotazioni: prenotazioni, data: data, stato: stato});
         dispatch(action);
         this.props.history.push('/prenotazioniDelGiorno');
     }
@@ -216,10 +216,10 @@ class CalendarioPrenotazioni extends React.Component {
                                                 </Typography>
                                                 
                                                 
-                                                <IconButton onClick={() => { self.goToDettaglioPrenotazione(index+1); }} onaria-label="valide">
+                                                <IconButton onClick={() => { self.goToDettaglioPrenotazione(index+1,'VALIDO'); }} onaria-label="valide">
                                                     <BadgeValido badgeContent={self.getNumPrenotazioniValide(index+1)}></BadgeValido>
                                                 </IconButton>
-                                                <IconButton onClick={() => { self.goToDettaglioPrenotazione(index+1); }} aria-label="in lavorazione">
+                                                <IconButton onClick={() => { self.goToDettaglioPrenotazione(index+1,'IN_LAVORAZIONE'); }} aria-label="in lavorazione">
                                                     <BadgeInLavorazione badgeContent={self.getNumPrenotazioniInLavorazione(index+1)}></BadgeInLavorazione>
                                                 </IconButton>
                                                 {/*

@@ -49,6 +49,8 @@ class RiepilogoOrdini extends React.Component {
 
     async componentDidMount(){
 
+        // TODO metti la prenotazione anche come singole elemento
+        /*
         const orariPacchetti= flatten(map(dettaglioPrenotazione => {
             return map(pacchetto => {
                 return {
@@ -58,7 +60,22 @@ class RiepilogoOrdini extends React.Component {
                 }
             }, filter(pacchetto => includes(this.props.data, keys(pacchetto.dettaglioPacchetto)),dettaglioPrenotazione.pacchetti));
         }, flatten(map(item => item.dettaglioPrenotazioni, this.props.prenotazioni))));
-
+        */
+       
+        const orariPacchetti= flatten(map(prenotazione => {
+            return map(dettaglioPrenotazione => {
+                return map(pacchetto => {
+                    return {
+                        servizio: dettaglioPrenotazione.servizio,
+                        pacchetto: pacchetto,
+                        fasciaOraria: pacchetto.dettaglioPacchetto[this.props.data],
+                        prenotazione: prenotazione
+                    }
+                }, filter(pacchetto => includes(this.props.data, keys(pacchetto.dettaglioPacchetto)),dettaglioPrenotazione.pacchetti));
+            },
+            prenotazione.dettaglioPrenotazioni);
+        }, this.props.prenotazioni));
+        
         const groupByIdServizio= groupBy(item => {
             return item.servizio.id;
         }, orariPacchetti);
@@ -135,7 +152,7 @@ class RiepilogoOrdini extends React.Component {
 
 RiepilogoOrdini.propTypes = {
     data: PropTypes.string.isRequired,
-    prenotazioni: PropTypes.array.isRequired
+    prenotazioni: PropTypes.array.isRequired,
 }
 
 export default RiepilogoOrdini;
