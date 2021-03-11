@@ -31,7 +31,7 @@ import TableRow from '@material-ui/core/TableRow';
 // https://www.robinwieruch.de/react-css-styling
 
 
-class RiepilogoOrdini extends React.Component {
+class RiepilogoPrenotazioniValide extends React.Component {
 
     constructor(props) {
         super(props);
@@ -49,20 +49,7 @@ class RiepilogoOrdini extends React.Component {
     }
 
     async componentDidMount(){
-
-        // TODO metti la prenotazione anche come singole elemento
-        /*
-        const orariPacchetti= flatten(map(dettaglioPrenotazione => {
-            return map(pacchetto => {
-                return {
-                    servizio: dettaglioPrenotazione.servizio,
-                    pacchetto: pacchetto,
-                    fasciaOraria: pacchetto.dettaglioPacchetto[this.props.data]
-                }
-            }, filter(pacchetto => includes(this.props.data, keys(pacchetto.dettaglioPacchetto)),dettaglioPrenotazione.pacchetti));
-        }, flatten(map(item => item.dettaglioPrenotazioni, this.props.prenotazioni))));
-        */
-       
+        
         const orariPacchetti= flatten(map(prenotazione => {
             return map(dettaglioPrenotazione => {
                 return map(pacchetto => {
@@ -155,9 +142,9 @@ class RiepilogoOrdini extends React.Component {
 }
 
 
-RiepilogoOrdini.propTypes = {
+RiepilogoPrenotazioniValide.propTypes = {
     data: PropTypes.string.isRequired,
     prenotazioni: PropTypes.array.isRequired,
 }
 
-export default RiepilogoOrdini;
+export default RiepilogoPrenotazioniValide;

@@ -47,7 +47,7 @@ class CalendarioPrenotazioni extends React.Component {
         this.getNumPrenotazioniInLavorazione= this.getNumPrenotazioniInLavorazione.bind(this);
         this.goToDettaglioPrenotazione= this.goToDettaglioPrenotazione.bind(this);
         this.navToPeriod= this.navToPeriod.bind(this);
-        this.getAnnoMeseFromState= this.getAnnoMeseFromState.bind(this);
+        this.getAnnoMese= this.getAnnoMese.bind(this);
         this.calcolaNumDays= this.calcolaNumDays.bind(this);
         this.refreshPrenotazioni= this.refreshPrenotazioni.bind(this);
         this.calcolaNuovoPeriodoCalendario= this.calcolaNuovoPeriodoCalendario.bind(this);
@@ -70,7 +70,7 @@ class CalendarioPrenotazioni extends React.Component {
         return new Date(numYear, numMonth, 0).getDate();
     }
 
-    getAnnoMeseFromState(numYear,numMonth){
+    getAnnoMese(numYear,numMonth){
         return numYear + "-" + (numMonth<10? '0' + numMonth : numMonth);
     }
 
@@ -79,9 +79,8 @@ class CalendarioPrenotazioni extends React.Component {
         if (isNil(this.state.calendar[numDay]) || isEmpty(this.state.calendar[numDay])){
             return;
         }
-        const prenotazioni= map(item => item.prenotazione, this.state.calendar[numDay]);
-
-        const data= head(map(item => item.data, this.state.calendar[numDay]));
+        const prenotazioni= filter(item => item.stato==stato, this.state.calendar[numDay]);
+        const data= this.getAnnoMese(this.state.numYear, this.state.numMonth) + "-" + (numDay<10? '0' + numDay : numDay);
         const { dispatch } = this.props;
         let action = PrenotazioniDelGiornoActionCreators.set({prenotazioni: prenotazioni, data: data, stato: stato});
         dispatch(action);
@@ -105,7 +104,7 @@ class CalendarioPrenotazioni extends React.Component {
     async refreshPrenotazioni(numYear,numMonth){
         const numDaysOfMonth= this.calcolaNumDays(numYear,numMonth);
 
-        const prenotazioni= (await this.prenotazioniService.get(['VALIDA', 'IN_LAVORAZIONE'], this.getAnnoMeseFromState(numYear, numMonth))).prenotazioni;
+        const prenotazioni= (await this.prenotazioniService.get(['VALIDA', 'IN_LAVORAZIONE'], this.getAnnoMese(numYear, numMonth))).prenotazioni;
 
         console.log(prenotazioni);
 
@@ -216,7 +215,7 @@ class CalendarioPrenotazioni extends React.Component {
                                                 </Typography>
                                                 
                                                 
-                                                <IconButton onClick={() => { self.goToDettaglioPrenotazione(index+1,'VALIDO'); }} onaria-label="valide">
+                                                <IconButton onClick={() => { self.goToDettaglioPrenotazione(index+1,'VALIDA'); }} onaria-label="valide">
                                                     <BadgeValido badgeContent={self.getNumPrenotazioniValide(index+1)}></BadgeValido>
                                                 </IconButton>
                                                 <IconButton onClick={() => { self.goToDettaglioPrenotazione(index+1,'IN_LAVORAZIONE'); }} aria-label="in lavorazione">

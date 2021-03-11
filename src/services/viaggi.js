@@ -43,8 +43,7 @@ class ViaggiService {
         }
     }
 
-    /*
-    async updateStato(emailUtente, idPrenotazione, statoPrenotazione, motivoRifiuto){
+    async updateStato(emailUtente, idViaggio, statoViaggio, motivoRifiutoViaggio, statoCheckIn, motivoRifiutoCheckIn){
           try{
         
             store.dispatch(Loading.increment());
@@ -65,9 +64,11 @@ class ViaggiService {
             body: JSON.stringify({
               
               'emailUtente': emailUtente,
-              'idPrenotazione': idPrenotazione,
-              'statoPrenotazione': statoPrenotazione,
-              'motivoRifiuto': motivoRifiuto
+              'idViaggio': idViaggio,
+              'statoViaggio': statoViaggio,
+              'motivoRifiutoViaggio': motivoRifiutoViaggio,
+              'statoCheckIn': statoCheckIn,
+              'motivoRifiutoCheckIn': motivoRifiutoCheckIn
             })
           });
 
@@ -76,7 +77,7 @@ class ViaggiService {
         } catch (e){
           store.dispatch(Loading.decrement()); 
         }
-      }*/
+      }
 
 }
 

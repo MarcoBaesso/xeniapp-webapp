@@ -30,52 +30,52 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 // https://www.robinwieruch.de/react-css-styling
 
-import RiepilogoPrenotazioniValide from '../../components/riepilogo/prenotazione/valida';
-import RiepilogoPrenotazioniInLavorazione from '../../components/riepilogo/prenotazione/inLavorazione'
+import RiepilogoViaggiValidi from '../../components/riepilogo/viaggi/valido';
 import { connect } from 'react-redux';
+import RiepilogoViaggiInLavorazione from '../../components/riepilogo/viaggi/inLavorazione';
 
-class PrenotazioniDelGiorno extends React.Component {
+class ViaggiDelGiorno extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
         };
-        this.checkPrenotazioniDelGiornoIsAvailable= this.checkPrenotazioniDelGiornoIsAvailable.bind(this);
+        this.checkViaggiDelGiornoIsAvailable= this.checkViaggiDelGiornoIsAvailable.bind(this);
         this.handleUpdateAll= this.handleUpdateAll.bind(this);
     }
 
-    checkPrenotazioniDelGiornoIsAvailable(state){
-        if (isNil(state) || isNil(state.prenotazioniDelGiorno) || isEmpty(state.prenotazioniDelGiorno)){
-            this.props.history.push('/calendarioPrenotazioni');
+    checkViaggiDelGiornoIsAvailable(state){
+        if (isNil(state) || isNil(state.viaggiDelGiorno) || isEmpty(state.viaggiDelGiorno)){
+            this.props.history.push('/calendarioViaggi');
             return false;
         }
         return true;
     }
 
-    handleUpdateAll(){
-        this.props.history.push('/calendarioPrenotazioni');        
+     handleUpdateAll(){
+        this.props.history.push('/calendarioViaggi');        
     }
 
     shouldComponentUpdate(propsSuccessive, stateSuccessivo){
-        return this.checkPrenotazioniDelGiornoIsAvailable(propsSuccessive);
+        return this.checkViaggiDelGiornoIsAvailable(propsSuccessive);
     }
 
     //className={style.root}
     render() {
         const self= this;
         return (
-            self.props.prenotazioniDelGiorno.stato=='VALIDA'?
-            <RiepilogoPrenotazioniValide data={self.props.prenotazioniDelGiorno.data} prenotazioni={self.props.prenotazioniDelGiorno.prenotazioni}></RiepilogoPrenotazioniValide>
-            : (self.props.prenotazioniDelGiorno.stato=='IN_LAVORAZIONE'?
-            <RiepilogoPrenotazioniInLavorazione data={self.props.prenotazioniDelGiorno.data} prenotazioni={self.props.prenotazioniDelGiorno.prenotazioni} handleUpdateAll={() => this.handleUpdateAll()}></RiepilogoPrenotazioniInLavorazione> : <div></div>)
+            self.props.viaggiDelGiorno.stato=='VALIDO'?
+            <RiepilogoViaggiValidi data={self.props.viaggiDelGiorno.data} viaggi={self.props.viaggiDelGiorno.viaggi}></RiepilogoViaggiValidi>
+            : (self.props.viaggiDelGiorno.stato=='IN_LAVORAZIONE'?
+            <RiepilogoViaggiInLavorazione data={self.props.viaggiDelGiorno.data} viaggi={self.props.viaggiDelGiorno.viaggi} handleUpdateAll={() => this.handleUpdateAll()}></RiepilogoViaggiInLavorazione> : <div></div>)
 
         )
     }
 }
 
 function mapStateToProps(state) {
-    const { prenotazioniDelGiorno } = state
-    return { prenotazioniDelGiorno: prenotazioniDelGiorno }
+    const { viaggiDelGiorno } = state
+    return { viaggiDelGiorno: viaggiDelGiorno }
 }
 
-export default connect(mapStateToProps)(PrenotazioniDelGiorno);
+export default connect(mapStateToProps)(ViaggiDelGiorno);

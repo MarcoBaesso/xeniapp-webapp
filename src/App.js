@@ -15,6 +15,7 @@ import {
 import Container from '@material-ui/core/Container';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { connect } from 'react-redux';
+import viaggiDelGiorno from './routes/viaggiDelGiorno';
 
 function Home() {
   return <h2>Home</h2>;
@@ -61,9 +62,6 @@ class App extends React.Component {
               <li>
                 <Link to="/calendarioPrenotazioni">Calendario prenotazioni</Link>
               </li>
-              <li>
-                <Link to="/gestisciPrenotazioni">Gestisci prenotazioni</Link>
-              </li>
             </ul>
           </nav>
 
@@ -83,7 +81,7 @@ class App extends React.Component {
               <Route path="/calendarioViaggi" component={CalendarioViaggi} />
               <Route path="/calendarioPrenotazioni" component={CalendarioPrenotazioni} />
               <Route path="/prenotazioniDelGiorno" component={PrenotazioniDelGiorno} />
-              <Route path="/gestisciPrenotazioni" component={GestisciPrenotazioni} />
+              <Route path="/viaggiDelGiorno" component={viaggiDelGiorno} />
             </Switch>
           </Container>
         </div>

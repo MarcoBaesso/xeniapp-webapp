@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import moment from 'moment';
 import Grid from '@material-ui/core/Grid';
 import { range, map, groupBy, keys, flatten, head, isNil, isEmpty, append, filter, includes, length } from 'ramda';
 import styles from './index.module.scss';
@@ -21,7 +22,7 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import PrenotazioniService from '../../../../services/prenotazioni';
+import ViaggiService from '../../../../services/viaggi';
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -34,49 +35,82 @@ import ButtonGroup from '@material-ui/core/ButtonGroup';
 
 // https://www.robinwieruch.de/react-css-styling
 
-class RiepilogoPrenotazioniInLavorazione extends React.Component {
+class RiepilogoViaggiInLavorazione extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            prenotazioni: [],
-            updatedPrenotazioni: [],
-            open: -1
+            viaggi: [],
+            updatedViaggi: [],
+            open: -1,
+            openCheckIn: -1
         };
-        this.prenotazioniService= new PrenotazioniService();
-        this.handleClickItemPrenotazione= this.handleClickItemPrenotazione.bind(this);
-        this.getTitleItemPrenotazione= this.getTitleItemPrenotazione.bind(this);
-        this.updateStatoPrenotazione= this.updateStatoPrenotazione.bind(this);
+        this.viaggiService= new ViaggiService();
+        this.handleClickItemViaggio= this.handleClickItemViaggio.bind(this);
+        this.handleClickItemViaggioCheckIn= this.handleClickItemViaggioCheckIn.bind(this);
+        this.getTitleItemViaggio= this.getTitleItemViaggio.bind(this);
+        this.updateStatoViaggio= this.updateStatoViaggio.bind(this);
+        this.updateStatoViaggioCheckIn= this.updateStatoViaggioCheckIn.bind(this);
     }
 
-    getTitleItemPrenotazione(prenotazione){
-        return new Date(prenotazione.dataPrenotazione).toLocaleDateString() + " - " + prenotazione.viaggio.emailUtente ;
+    getTitleItemViaggio(viaggio){
+        return "utente: " + viaggio.emailUtente + ", da: " + moment(new Date(Date.parse(viaggio.dataInizio))).format('L') + ", a: " + moment(new Date(Date.parse(viaggio.dataFine))).format('L');
     }
 
-    handleClickItemPrenotazione(index){
+    handleClickItemViaggio(index){
         this.setState({
-            open: this.state.open==index? -1 : index
+            open: this.state.open==index? -1 : index,
+            openCheckIn: -1
+        })
+    }
+
+    handleClickItemViaggioCheckIn(index){
+        this.setState({
+            openCheckIn: this.state.openCheckIn==index? -1 : index,
         })
     }
     
-    async updateStatoPrenotazione(prenotazione, stato, motivoRifiuto){
-        await this.prenotazioniService.updateStato(prenotazione.viaggio.emailUtente, prenotazione.id, stato, motivoRifiuto);
-        const updatedPrenotazioni= append(prenotazione.id, this.state.updatedPrenotazioni);
-        const prenotazioni= filter(item => !includes(item.id, updatedPrenotazioni), this.state.prenotazioni);
-        this.setState({
-            open: -1,
-            updatedPrenotazioni: updatedPrenotazioni,
-            prenotazioni: prenotazioni
-        });
+    async updateStatoViaggio(viaggio, stato, motivoRifiuto){
+        const response= await this.viaggiService.updateStato(viaggio.emailUtente, viaggio.id, stato, motivoRifiuto);
+        if (response) {
+            const updatedViaggi= !isNil(viaggio.viaggioCheckIn) && viaggio.viaggioCheckIn.stato!='IN_LAVORAZIONE'? append(viaggio.id, this.state.updatedViaggi) : this.state.updatedViaggi;
+            const viaggi= filter(item => !includes(item.id, updatedViaggi), this.state.viaggi);
+            
+            this.setState({
+                open: -1,
+                openCheckIn: -1,
+                updatedViaggi: updatedViaggi,
+                viaggi: viaggi
+            });
 
-        if (length(prenotazioni)==0){
-            this.props.handleUpdateAll();
+            if (length(viaggi)==0){
+                this.props.handleUpdateAll();
+            }
+        }
+    }
+
+    async updateStatoViaggioCheckIn(viaggio, statoCheckIn, motivoRifiutoCheckIn){
+        const response= await this.viaggiService.updateStato(viaggio.emailUtente, viaggio.id, viaggio.stato, viaggio.motivoRifiuto, statoCheckIn, motivoRifiutoCheckIn);
+        if (response) {
+            const updatedViaggi= viaggio.stato!='IN_LAVORAZIONE' && statoCheckIn!='IN_LAVORAZIONE' ? append(viaggio.id, this.state.updatedViaggi) : this.state.updatedViaggi;
+            const viaggi= filter(item => !includes(item.id, updatedViaggi), this.state.viaggi);
+
+            this.setState({
+                open: -1,
+                openCheckIn: -1,
+                updatedViaggi: updatedViaggi,
+                viaggi: viaggi
+            });
+
+            if (length(viaggi)==0){
+                this.props.handleUpdateAll();
+            }
         }
     }
 
     componentDidMount(){
         this.setState({
-            prenotazioni: this.props.prenotazioni
+            viaggi: this.props.viaggi
         })
     }
 
@@ -87,22 +121,43 @@ class RiepilogoPrenotazioniInLavorazione extends React.Component {
                 {
                     <List>
                         {
-                            self.state.prenotazioni.map(function(value,index){
+                            self.state.viaggi.map(function(value,index){
                                 return (
                                 <Box>
-                                    <ListItem button onClick={() => self.handleClickItemPrenotazione(index)}>
-                                        <ListItemText primary={self.getTitleItemPrenotazione(value)} />
+                                    <ListItem button onClick={() => self.handleClickItemViaggio(index)}>
+                                        <ListItemText primary={self.getTitleItemViaggio(value)} />
+                                        <ListItemText secondary={isNil(value.viaggioCheckIn)? 'CHECKIN non disponibile' : 'CHECKIN disponibile'} />
                                         {self.state.open==index ? <ExpandLess /> : <ExpandMore />}
                                     </ListItem>
                                     <Collapse in={self.state.open==index} timeout="auto" unmountOnExit>
                                         <Box className={styles.buttonGroupContainer}>
                                             <ButtonGroup color="primary">
-                                                <Button onClick={() => self.updateStatoPrenotazione(value, 'VALIDA')} variant={value.stato=="VALIDA"? 'contained' : 'outlined'} color={value.stato=="IN_LAVORAZIONE"? 'secondary' : 'primary'}>Convalida</Button>
+                                                <Button disabled={value.stato!="IN_LAVORAZIONE"} onClick={() => self.updateStatoViaggio(value, 'VALIDO')} variant={value.stato=="VALIDO"? 'contained' : 'outlined'} color={value.stato=="IN_LAVORAZIONE"? 'secondary' : 'primary'}>Convalida</Button>
                                                 <Button disabled variant={value.stato=="IN_LAVORAZIONE"? 'contained' : 'outlined'} color={value.stato=="IN_LAVORAZIONE"? 'secondary' : 'primary'}>In lavorazione</Button>
-                                                <Button onClick={() => self.updateStatoPrenotazione(value, 'ANNULLATA')} variant={value.stato=="ANNULLATA"? 'contained' : 'outlined'} color={value.stato=="IN_LAVORAZIONE"? 'secondary' : 'primary'}>Annulla</Button>
+                                                <Button disabled={value.stato!="IN_LAVORAZIONE"} onClick={() => self.updateStatoViaggio(value, 'ANNULLATO')} variant={value.stato=="ANNULLATO"? 'contained' : 'outlined'} color={value.stato=="ANNULLATO"? 'secondary' : 'primary'}>Annulla</Button>
                                             </ButtonGroup>
                                         </Box>
+                                        <List>
+                                            <ListItemText primary={"Trattamento: " + value.tipoTrattamento} />
+                                            {value.viaggioCheckIn && 
+                                                <ListItem button onClick={() => self.handleClickItemViaggioCheckIn(index)}>
+                                                    <ListItemText primary="Info checkin" />
+                                                    {self.state.openCheckIn==index ? <ExpandLess /> : <ExpandMore />}
+                                                </ListItem>
+                                            }
+                                        </List>
+                                        <Collapse in={self.state.openCheckIn==index} timeout="auto" unmountOnExit>
+                                            <Box className={styles.buttonGroupContainer}>
+                                                <ButtonGroup color="primary">
+                                                    <Button disabled={value.viaggioCheckIn.stato!="IN_LAVORAZIONE"} onClick={() => self.updateStatoViaggioCheckIn(value, 'VALIDO')} variant={value.viaggioCheckIn.stato=="VALIDO"? 'contained' : 'outlined'} color={value.viaggioCheckIn.stato=="IN_LAVORAZIONE"? 'secondary' : 'primary'}>Convalida</Button>
+                                                    <Button disabled variant={value.viaggioCheckIn.stato=="IN_LAVORAZIONE"? 'contained' : 'outlined'} color={value.viaggioCheckIn.stato=="IN_LAVORAZIONE"? 'secondary' : 'primary'}>In lavorazione</Button>
+                                                    <Button disabled={value.viaggioCheckIn.stato!="IN_LAVORAZIONE"} onClick={() => self.updateStatoViaggioCheckIn(value, 'ANNULLATO')} variant={value.viaggioCheckIn.stato=="ANNULLATO"? 'contained' : 'outlined'} color={value.viaggioCheckIn.stato=="ANNULLATO"? 'secondary' : 'primary'}>Annulla</Button>
+                                                </ButtonGroup>
+                                            </Box>
+                                        </Collapse>
+                                        {/*
                                         <div className={styles.pacchettiContainer}>
+                                            {
                                             <Grid container justify="center" direction="row" justify="center" alignItems="center" spacing={2} xs={6}>
                                                 {
                                                     value.dettaglioPrenotazioni.map(function(dettaglioPrenotazione,indexDettaglioPrenotazione){
@@ -151,7 +206,8 @@ class RiepilogoPrenotazioniInLavorazione extends React.Component {
                                                     })
                                                 }
                                             </Grid>
-                                        </div>
+                                           
+                                        </div> */}
                                     </Collapse>
                                 </Box>
                                 )
@@ -166,11 +222,11 @@ class RiepilogoPrenotazioniInLavorazione extends React.Component {
 }
 
 
-RiepilogoPrenotazioniInLavorazione.propTypes = {
+RiepilogoViaggiInLavorazione.propTypes = {
     data: PropTypes.string.isRequired,
-    prenotazioni: PropTypes.array.isRequired,
+    viaggi: PropTypes.array.isRequired,
     handleUpdateAll: PropTypes.func.isRequired
 }
 
 //https://react-redux.js.org/using-react-redux/connect-mapdispatch
-export default RiepilogoPrenotazioniInLavorazione;
+export default RiepilogoViaggiInLavorazione;

@@ -29,7 +29,7 @@ import lime from '@material-ui/core/colors/lime';
 
 import { connect } from 'react-redux';
 
-import * as PrenotazioniDelGiornoActionCreators from '../../actions/prenotazioniDelGiornoActionCreators';
+import * as ViaggiDelGiornoActionCreators from '../../actions/viaggiDelGiornoActionCreators';
 import BadgeValido from '../../components/badge/valido';
 import BadgeInLavorazione from '../../components/badge/inLavorazione';
 
@@ -47,7 +47,7 @@ class CalendarioViaggi extends React.Component {
         this.getNumViaggiInLavorazione= this.getNumViaggiInLavorazione.bind(this);
         this.goToDettaglioViaggio= this.goToDettaglioViaggio.bind(this);
         this.navToPeriod= this.navToPeriod.bind(this);
-        this.getAnnoMeseFromState= this.getAnnoMeseFromState.bind(this);
+        this.getAnnoMese= this.getAnnoMese.bind(this);
         this.calcolaNumDays= this.calcolaNumDays.bind(this);
         this.refreshViaggi= this.refreshViaggi.bind(this);
         this.calcolaNuovoPeriodoCalendario= this.calcolaNuovoPeriodoCalendario.bind(this);
@@ -70,22 +70,21 @@ class CalendarioViaggi extends React.Component {
         return new Date(numYear, numMonth, 0).getDate();
     }
 
-    getAnnoMeseFromState(numYear,numMonth){
+    getAnnoMese(numYear,numMonth){
         return numYear + "-" + (numMonth<10? '0' + numMonth : numMonth);
     }
 
-    goToDettaglioViaggio(numDay){
+    goToDettaglioViaggio(numDay,stato){
         // todo route to dettaglio prenotazione
         if (isNil(this.state.calendar[numDay]) || isEmpty(this.state.calendar[numDay])){
             return;
         }
-        const prenotazioni= map(item => item.prenotazione, this.state.calendar[numDay]);
-
-        const data= head(map(item => item.date, this.state.calendar[numDay]));
+        const viaggi= filter(item => item.stato==stato || (isNil(item.viaggioCheckIn)? true : item.viaggioCheckIn.stato==stato), this.state.calendar[numDay]);
+        const data= this.getAnnoMese(this.state.numYear, this.state.numMonth) + "-" + (numDay<10? '0' + numDay : numDay);
         const { dispatch } = this.props;
-        let action = PrenotazioniDelGiornoActionCreators.set({prenotazioni: prenotazioni, data: data});
+        let action = ViaggiDelGiornoActionCreators.set({viaggi: viaggi, data: data, stato: stato});
         dispatch(action);
-        this.props.history.push('/prenotazioniDelGiorno');
+        this.props.history.push('/viaggiDelGiorno');
     }
 
     getDay(numDay){
@@ -95,17 +94,17 @@ class CalendarioViaggi extends React.Component {
     }
 
     getNumViaggiValidi(numDay){
-        return this.state.calendar[numDay]? length(filter((item) => item.stato=='VALIDO', this.state.calendar[numDay])) : 0;
+        return this.state.calendar[numDay]? length(filter((item) => item.stato=='VALIDO' && (isNil(item.viaggioCheckIn)? true : item.viaggioCheckIn.stato!='IN_LAVORAZIONE'), this.state.calendar[numDay])) : 0;
     }
 
     getNumViaggiInLavorazione(numDay){
-        return this.state.calendar[numDay]? length(filter((item) => item.stato=='IN_LAVORAZIONE', this.state.calendar[numDay])) : 0;
+        return this.state.calendar[numDay]? length(filter((item) => item.stato=='IN_LAVORAZIONE' || (isNil(item.viaggioCheckIn)? false : item.viaggioCheckIn.stato=='IN_LAVORAZIONE'), this.state.calendar[numDay])) : 0;
     }
 
     async refreshViaggi(numYear,numMonth){
         const numDaysOfMonth= this.calcolaNumDays(numYear,numMonth);
 
-        const viaggi= (await this.viaggiService.get(['VALIDO', 'IN_LAVORAZIONE'], this.getAnnoMeseFromState(numYear, numMonth))).viaggi;
+        const viaggi= (await this.viaggiService.get(['VALIDO', 'IN_LAVORAZIONE'], this.getAnnoMese(numYear, numMonth))).viaggi;
 
         console.log(viaggi);
 
@@ -208,10 +207,10 @@ class CalendarioViaggi extends React.Component {
                                                 </Typography>
                                                 
                                                 
-                                                <IconButton onClick={() => { self.goToDettaglioViaggio(index+1); }} onaria-label="valide">
+                                                <IconButton onClick={() => { self.goToDettaglioViaggio(index+1,'VALIDO'); }} onaria-label="valide">
                                                     <BadgeValido badgeContent={self.getNumViaggiValidi(index+1)}></BadgeValido>
                                                 </IconButton>
-                                                <IconButton onClick={() => { self.goToDettaglioViaggio(index+1); }} aria-label="in lavorazione">
+                                                <IconButton onClick={() => { self.goToDettaglioViaggio(index+1,'IN_LAVORAZIONE'); }} aria-label="in lavorazione">
                                                     <BadgeInLavorazione badgeContent={self.getNumViaggiInLavorazione(index+1)}></BadgeInLavorazione>
                                                 </IconButton>
                                                 {/*
