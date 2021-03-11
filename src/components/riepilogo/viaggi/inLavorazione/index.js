@@ -23,6 +23,7 @@ import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import ViaggiService from '../../../../services/viaggi';
+import OspitiService from '../../../../services/ospiti';
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -32,6 +33,12 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 
 import ButtonGroup from '@material-ui/core/ButtonGroup';
+
+import Badge from "@material-ui/core/Badge";
+import green from '@material-ui/core/colors/green';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faFileImage } from '@fortawesome/free-solid-svg-icons'
+import IconButton from '@material-ui/core/IconButton';
 
 // https://www.robinwieruch.de/react-css-styling
 
@@ -43,14 +50,18 @@ class RiepilogoViaggiInLavorazione extends React.Component {
             viaggi: [],
             updatedViaggi: [],
             open: -1,
-            openCheckIn: -1
+            openCheckIn: -1,
+            ospiti: []
         };
         this.viaggiService= new ViaggiService();
+        this.ospitiService= new OspitiService();
         this.handleClickItemViaggio= this.handleClickItemViaggio.bind(this);
         this.handleClickItemViaggioCheckIn= this.handleClickItemViaggioCheckIn.bind(this);
         this.getTitleItemViaggio= this.getTitleItemViaggio.bind(this);
         this.updateStatoViaggio= this.updateStatoViaggio.bind(this);
         this.updateStatoViaggioCheckIn= this.updateStatoViaggioCheckIn.bind(this);
+        this.downloadDocumentoOspite= this.downloadDocumentoOspite.bind(this);
+        this.downloadFile= this.downloadFile.bind(this);
     }
 
     getTitleItemViaggio(viaggio){
@@ -64,9 +75,13 @@ class RiepilogoViaggiInLavorazione extends React.Component {
         })
     }
 
-    handleClickItemViaggioCheckIn(index){
+    async handleClickItemViaggioCheckIn(viaggio, index){
+        const open= this.state.openCheckIn==index? -1 : index;
+        const ospiti= open==-1? [] : await this.ospitiService.get(viaggio.emailUtente, viaggio.viaggioCheckIn.idOspiti);
+
         this.setState({
-            openCheckIn: this.state.openCheckIn==index? -1 : index,
+            openCheckIn: open,
+            ospiti: ospiti
         })
     }
     
@@ -87,6 +102,26 @@ class RiepilogoViaggiInLavorazione extends React.Component {
                 this.props.handleUpdateAll();
             }
         }
+    }
+    
+    downloadFile(blob, fileName){
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        const clickHandler = () => {
+            setTimeout(() => {
+            URL.revokeObjectURL(url);
+            a.removeEventListener('click', clickHandler);
+            }, 0);
+        };
+        a.addEventListener('click', clickHandler, false);
+        a.click();
+    }
+
+    async downloadDocumentoOspite(viaggio, ospite, lato){
+        const blobDocumento= await this.ospitiService.getDocumentoOspite(viaggio.emailUtente, ospite.id, lato, ospite.documento.tipoDocumento);
+        this.downloadFile(blobDocumento, ospite.documento.tipoDocumento + "_" + lato + "_" + ospite.cognome + "_" + ospite.nome);
     }
 
     async updateStatoViaggioCheckIn(viaggio, statoCheckIn, motivoRifiutoCheckIn){
@@ -140,7 +175,7 @@ class RiepilogoViaggiInLavorazione extends React.Component {
                                         <List>
                                             <ListItemText primary={"Trattamento: " + value.tipoTrattamento} />
                                             {value.viaggioCheckIn && 
-                                                <ListItem button onClick={() => self.handleClickItemViaggioCheckIn(index)}>
+                                                <ListItem button onClick={() => self.handleClickItemViaggioCheckIn(value, index)}>
                                                     <ListItemText primary="Info checkin" />
                                                     {self.state.openCheckIn==index ? <ExpandLess /> : <ExpandMore />}
                                                 </ListItem>
@@ -154,6 +189,49 @@ class RiepilogoViaggiInLavorazione extends React.Component {
                                                     <Button disabled={value.viaggioCheckIn.stato!="IN_LAVORAZIONE"} onClick={() => self.updateStatoViaggioCheckIn(value, 'ANNULLATO')} variant={value.viaggioCheckIn.stato=="ANNULLATO"? 'contained' : 'outlined'} color={value.viaggioCheckIn.stato=="ANNULLATO"? 'secondary' : 'primary'}>Annulla</Button>
                                                 </ButtonGroup>
                                             </Box>
+                                            <TableContainer component={Paper}>
+                                                <Table aria-label="simple table">
+                                                    <TableHead>
+                                                        <TableRow>
+                                                            <TableCell align="center">Nome</TableCell>
+                                                            <TableCell align="center">Cognome</TableCell>
+                                                            <TableCell align="center">Data nascita</TableCell>
+                                                            <TableCell align="center">Tipo documento</TableCell>
+                                                            <TableCell align="center">Numero documento</TableCell>
+                                                            <TableCell align="center">Data rilascio</TableCell>
+                                                            <TableCell align="center">Data scadenza</TableCell>
+                                                            <TableCell align="center">Fronte</TableCell>
+                                                            <TableCell align="center">Retro</TableCell>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {
+                                                            self.state.ospiti.map(function(ospite,indexOspite){
+                                                                return (<TableRow key={indexOspite}>
+                                                                            <TableCell component="th" scope="row">{ospite.nome}</TableCell>
+                                                                            <TableCell align="center">{ospite.cognome}</TableCell>
+                                                                            <TableCell align="center">{new Date(ospite.dataNascita).toLocaleDateString()}</TableCell>
+                                                                            <TableCell align="center">{ospite.documento.tipoDocumento}</TableCell>
+                                                                            <TableCell align="center">{ospite.documento.numeroDocumento}</TableCell>
+                                                                            <TableCell align="center">{ospite.documento.dataRilascio}</TableCell>
+                                                                            <TableCell align="center">{ospite.documento.dataScadenza}</TableCell>
+                                                                            <TableCell align="center">
+                                                                                <IconButton onClick={() => self.downloadDocumentoOspite(value, ospite, 'fronte')}>
+                                                                                    <FontAwesomeIcon icon={faFileImage} />
+                                                                                </IconButton>
+                                                                            </TableCell>
+                                                                            <TableCell align="center">
+                                                                                <IconButton onClick={() => self.downloadDocumentoOspite(value, ospite, 'retro')}>
+                                                                                    <FontAwesomeIcon icon={faFileImage} />
+                                                                                </IconButton>
+                                                                            </TableCell>
+                                                                        </TableRow>
+                                                                    )
+                                                            })
+                                                        }
+                                                    </TableBody>
+                                                </Table>
+                                            </TableContainer>
                                         </Collapse>
                                         {/*
                                         <div className={styles.pacchettiContainer}>
